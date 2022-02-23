@@ -1,0 +1,55 @@
+syntax = "proto3";
+package tasks;
+
+enum Mood {
+    Happy = 0;
+    Sad = 1;
+}
+
+service TasksService {
+  rpc ListTasks(ListTaskRequest) returns (ListTaskResponse) {}
+  rpc CreateTask(CreateTaskRequest) returns (Task) {}
+  rpc AccomplishTask(AccomplishTaskRequest) returns (AccomplishTaskResponse) {}
+  rpc ListAccomplishedTasks(ListAccomplishedTasksRequest) returns (ListAccomplishedTasksResponse) {}
+}
+
+message Task {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+
+  repeated Mood moods = 4;
+}
+
+message ListTaskRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListTaskResponse {
+  repeated Task tasks = 1;
+  string next_page_token = 2;
+}
+
+message CreateTaskRequest {
+  Task task = 1; 
+  int32 test_number = 2;
+}
+
+message AccomplishTaskRequest {
+  string user_id = 1;
+  string task_id = 2;
+}
+
+message AccomplishTaskResponse {
+  string user_id = 1;
+  string task_id = 2;
+}
+
+message ListAccomplishedTasksRequest {
+  string user_id = 1;
+}
+
+message ListAccomplishedTasksResponse {
+  repeated string task_ids = 1;
+}
