@@ -40,7 +40,7 @@ impl TasksStorage for LocalTasksStorage {
 
     async fn list_tasks_done(&self, user_id: &UserID) -> Option<Vec<model::TaskID>> {
         let logs = self.logs.lock().unwrap();
-        logs.get(user_id).map(|logs| logs.clone())
+        logs.get(user_id).cloned()
     }
 
     async fn accomplish_task(&self, user_id: &UserID, task: &model::TaskID) -> () {

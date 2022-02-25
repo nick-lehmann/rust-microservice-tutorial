@@ -53,14 +53,14 @@ impl TasksStorage for PostgresStorage {
         Ok(task.into())
     }
 
-    async fn list_tasks_done(&self, user_id: &UserID) -> Option<Vec<model::TaskID>> {
+    async fn list_tasks_done(&self, _user_id: &UserID) -> Option<Vec<model::TaskID>> {
         todo!()
     }
 
     async fn accomplish_task(
         &self,
-        user_id: &crate::model::user::UserID,
-        task: &crate::model::task::TaskID,
+        _user_id: &crate::model::user::UserID,
+        _task: &crate::model::task::TaskID,
     ) -> () {
         todo!()
     }

@@ -12,12 +12,12 @@ pub mod proto {
     tonic::include_proto!("tasks");
 }
 
-impl Into<Task> for proto::Task {
-    fn into(self) -> Task {
+impl From<proto::Task> for Task {
+    fn from(val: proto::Task) -> Self {
         Task {
-            id: self.id,
-            name: self.name,
-            description: self.description,
+            id: val.id,
+            name: val.name,
+            description: val.description,
         }
     }
 }
@@ -73,7 +73,7 @@ impl<Service: TasksService + Send + Sync + 'static> TasksAPIService for TasksAPI
             .map(|task| task.into())
             .collect();
         Ok(Response::new(proto::ListTaskResponse {
-            tasks: tasks,
+            tasks,
             next_page_token: "".to_string(),
         }))
     }

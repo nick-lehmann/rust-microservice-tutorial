@@ -9,12 +9,12 @@ pub struct Task {
     pub description: String,
 }
 
-impl Into<model::Task> for Task {
-    fn into(self) -> model::Task {
+impl From<Task> for model::Task {
+    fn from(val: Task) -> Self {
         model::Task {
-            id: self.id as u32,
-            name: self.name,
-            description: self.description,
+            id: val.id as u32,
+            name: val.name,
+            description: val.description,
         }
     }
 }
