@@ -1,20 +1,27 @@
+#[macro_use]
+extern crate diesel;
+
 mod api;
 mod model;
 mod services;
+mod storage;
 
+use std::net::SocketAddr;
 use tonic::transport::Server;
 
 use crate::{
     api::tasks::{TasksAPI, TasksServiceServer},
-    services::tasks::LocalTasksService,
+    services::tasks::SimpleTasksService,
+    storage::postgres::service::{get_pool, PostgresStorage},
 };
 
 #[tokio::main]
 #[allow(dead_code)]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "0.0.0.0:50051".parse()?;
+    let addr: SocketAddr = "0.0.0.0:50051".parse()?;
 
-    let tasks_service = LocalTasksService::default();
+    let tasks_storage = PostgresStorage::new(get_pool());
+    let tasks_service = SimpleTasksService::new(tasks_storage);
 
     let tasks_api = TasksAPI::new(tasks_service);
 

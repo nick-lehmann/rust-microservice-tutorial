@@ -1,6 +1,9 @@
 use tonic::{Code, Request, Response, Status};
 
-use crate::{model::task::Task, services::tasks::TasksService};
+use crate::{
+    model::task::{Task, TaskInput},
+    services::tasks::TasksService,
+};
 
 use self::proto::tasks_service_server::TasksService as TasksAPIService;
 pub use self::proto::tasks_service_server::TasksServiceServer;
@@ -30,6 +33,22 @@ impl From<Task> for proto::Task {
     }
 }
 
+impl TryInto<TaskInput> for proto::CreateTaskRequest {
+    type Error = Status;
+
+    fn try_into(self) -> Result<TaskInput, Self::Error> {
+        let proto_task = match self.task {
+            Some(task) => task,
+            None => return Err(Status::new(Code::InvalidArgument, "Task is required")),
+        };
+
+        Ok(TaskInput {
+            name: proto_task.name,
+            description: proto_task.description,
+        })
+    }
+}
+
 pub struct TasksAPI<Service: TasksService> {
     service: Service,
 }
@@ -41,7 +60,7 @@ impl<Service: TasksService> TasksAPI<Service> {
 }
 
 #[tonic::async_trait]
-impl<Service: TasksService + Sync + Send + 'static> TasksAPIService for TasksAPI<Service> {
+impl<Service: TasksService + Send + Sync + 'static> TasksAPIService for TasksAPI<Service> {
     async fn list_tasks(
         &self,
         _request: Request<proto::ListTaskRequest>,
@@ -63,14 +82,10 @@ impl<Service: TasksService + Sync + Send + 'static> TasksAPIService for TasksAPI
         &self,
         request: Request<proto::CreateTaskRequest>,
     ) -> Result<Response<proto::Task>, Status> {
-        let body = request.into_inner();
-
-        let task = match body.task {
-            Some(task) => task,
-            None => return Err(Status::new(Code::InvalidArgument, "Task is required")),
-        };
-
-        let new_task = self.service.create_task(task.into()).await;
+        let new_task = self
+            .service
+            .create_task(request.into_inner().try_into()?)
+            .await;
 
         Ok(Response::new(new_task.into()))
     }

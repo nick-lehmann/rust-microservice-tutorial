@@ -14,7 +14,7 @@ service TasksService {
 }
 
 message Task {
-  string id = 1;
+  uint32 id = 1;
   string name = 2;
   string description = 3;
 
@@ -38,12 +38,12 @@ message CreateTaskRequest {
 
 message AccomplishTaskRequest {
   string user_id = 1;
-  string task_id = 2;
+  uint32 task_id = 2;
 }
 
 message AccomplishTaskResponse {
   string user_id = 1;
-  string task_id = 2;
+  uint32 task_id = 2;
 }
 
 message ListAccomplishedTasksRequest {
@@ -51,5 +51,5 @@ message ListAccomplishedTasksRequest {
 }
 
 message ListAccomplishedTasksResponse {
-  repeated string task_ids = 1;
+  repeated uint32 task_ids = 1;
 }
