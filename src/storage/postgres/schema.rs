@@ -25,8 +25,4 @@ table! {
 joinable!(task_logs -> tasks (task_id));
 joinable!(task_logs -> users (user_id));
 
-allow_tables_to_appear_in_same_query!(
-    task_logs,
-    tasks,
-    users,
-);
+allow_tables_to_appear_in_same_query!(task_logs, tasks, users,);

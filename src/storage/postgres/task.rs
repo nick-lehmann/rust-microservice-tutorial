@@ -1,4 +1,4 @@
-use super::schema::tasks;
+use super::schema::{task_logs, tasks};
 use crate::model::task as model;
 use diesel::Queryable;
 
@@ -33,4 +33,11 @@ impl From<model::TaskInput> for NewTask {
             description: task.description,
         }
     }
+}
+
+#[derive(Insertable)]
+#[table_name = "task_logs"]
+pub struct NewTaskLog {
+    pub task_id: i32,
+    pub user_id: i32,
 }

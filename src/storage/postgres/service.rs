@@ -1,10 +1,12 @@
-use diesel::{r2d2::ConnectionManager, PgConnection, RunQueryDsl};
+use crate::diesel::ExpressionMethods;
+use diesel::{r2d2::ConnectionManager, PgConnection, QueryDsl, RunQueryDsl};
 use r2d2::Pool;
 
+use super::schema::task_logs::dsl::*;
 use super::schema::tasks::dsl::*;
-use super::task::Task;
+use super::task::{NewTaskLog, Task};
 use crate::model::task as model;
-use crate::model::user::UserID;
+use crate::model::user as user_model;
 use crate::storage::postgres::task::NewTask;
 use crate::storage::{StorageResult, TasksStorage};
 
@@ -33,6 +35,7 @@ impl TasksStorage for PostgresStorage {
         let connection = self.pool.get().unwrap();
 
         let results = tasks
+            .filter(id.eq(1))
             .load::<Task>(&connection)
             .expect("Error loading posts");
 
@@ -53,15 +56,37 @@ impl TasksStorage for PostgresStorage {
         Ok(task.into())
     }
 
-    async fn list_tasks_done(&self, _user_id: &UserID) -> Option<Vec<model::TaskID>> {
-        todo!()
+    async fn list_tasks_done(&self, user: &user_model::UserID) -> Option<Vec<model::TaskID>> {
+        let connection = self.pool.get().unwrap();
+
+        let user_id_int: i32 = user.parse().unwrap();
+
+        let result: Vec<i32> = tasks
+            .inner_join(task_logs)
+            .select(task_id)
+            .filter(user_id.eq(user_id_int))
+            .load(&connection)
+            .unwrap();
+
+        Some(result.into_iter().map(|x| x as u32).collect())
     }
 
     async fn accomplish_task(
         &self,
-        _user_id: &crate::model::user::UserID,
-        _task: &crate::model::task::TaskID,
+        user: &user_model::UserID,
+        task: &crate::model::task::TaskID,
     ) -> () {
-        todo!()
+        let connection = self.pool.get().unwrap();
+        let user_id_integer: i32 = user.parse().unwrap();
+
+        let input = NewTaskLog {
+            task_id: task.to_owned() as i32,
+            user_id: user_id_integer,
+        };
+
+        diesel::insert_into(task_logs)
+            .values(input)
+            .execute(&connection)
+            .unwrap();
     }
 }
